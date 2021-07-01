@@ -54,14 +54,9 @@ jobs:
             const fs = require('fs');
             const path = require('path');
 
-            fs.readdir(testFolder, (err, files) => {
-              // handle error
-              if (err) {
-                  return console.log('Unable to scan directory: ' + err);
-              } 
-
-              // loop through files
-              files.forEach(file => {
+            try {
+              const files = await fs.readdir(issuesDir);
+              for (const file of files) {
                 console.log(`File found: ${file}`);
                 console.log("Creating issue...");
 
@@ -85,6 +80,7 @@ jobs:
                   content_id: responseIssue.data.id,
                   content_type: "Issue",
                 });
-
-              });
-            });
+              }
+            } catch (err) {
+              console.log(err);
+            }
