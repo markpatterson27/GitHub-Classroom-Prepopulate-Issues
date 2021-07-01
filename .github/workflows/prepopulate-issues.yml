@@ -10,8 +10,8 @@ env:
   ISSUES_DIR: ".github/STARTING_ISSUES/"
 
 jobs:
-  build:
-    name: Create issue
+  create:
+    name: Create project and issues
     runs-on: ubuntu-latest
     if: ${{ github.ref == 'refs/heads/feedback' }}  # only run when feedback branch is created
                                                     # feedback branch is created just after repository creation
