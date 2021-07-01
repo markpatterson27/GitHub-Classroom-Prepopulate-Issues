@@ -55,7 +55,7 @@ jobs:
             const path = require('path');
 
             try {
-              const files = await fs.readdir(issuesDir);
+              const files = fs.readdirSync(issuesDir);
               for (const file of files) {
                 console.log(`File found: ${file}`);
                 console.log("Creating issue...");
