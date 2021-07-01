@@ -16,6 +16,8 @@ jobs:
     if: ${{ github.ref == 'refs/heads/feedback' }}  # only run when feedback branch is created
                                                     # feedback branch is created just after repository creation
     steps:
+      - uses: actions/checkout@v2
+
       # create project and column to hold issue cards
       # returns column ID of created column
       - name: Create project and column
