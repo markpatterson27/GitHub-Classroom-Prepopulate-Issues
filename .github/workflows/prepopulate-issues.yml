@@ -1,0 +1,90 @@
+name: Populate Issues
+
+on:
+  create:
+
+  # Allows this workflow to be manually run from the Actions tab
+  workflow_dispatch:
+
+env:
+  ISSUES_DIR: ".github/STARTING_ISSUES/"
+
+jobs:
+  build:
+    name: Create issue
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/feedback' }}  # only run when feedback branch is created
+                                                    # feedback branch is created just after repository creation
+    steps:
+      # create project and column to hold issue cards
+      # returns column ID of created column
+      - name: Create project and column
+        id: create-project
+        uses: actions/github-script@v4
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const responseProject = await github.projects.createForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              name: 'Assignment Tasks',
+              body: 'Complete the tasks outlined in each issue.',
+            });
+            console.log(`Create project response - status: ${responseProject.status}`)
+            const responseColumn = await github.projects.createColumn({
+              project_id: responseProject.data.id,
+              name: 'To Do',
+            });
+            console.log(`Create column response - status: ${responseColumn.status}`)
+            return responseColumn.data.id;
+          result-encoding: string
+      
+      # read files from issue dir and create issue per file
+      - name: Create issues
+        id: create-issues
+        uses: actions/github-script@v4
+        env:
+          COLUMN_ID: ${{ steps.create-project.outputs.result }}
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const columnID = parseInt(process.env.COLUMN_ID);
+            const issuesDir = process.env.ISSUES_DIR;
+
+            const fs = require('fs');
+            const path = require('path');
+
+            fs.readdir(testFolder, (err, files) => {
+              // handle error
+              if (err) {
+                  return console.log('Unable to scan directory: ' + err);
+              } 
+
+              // loop through files
+              files.forEach(file => {
+                console.log(`File found: ${file}`);
+                console.log("Creating issue...");
+
+                // read file
+                let issueTitle = path.parse(file).name;
+                let issueBody = fs.readFileSync(file, "utf8");
+
+                // create issue
+                const responseIssue = await github.issues.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  title: issueTitle,
+                  body: issueBody,
+                });
+                console.log(`Create issue ${issueTitle} response - status: ${responseIssue.status}`);
+
+                // add issue to project board
+                github.projects.createCard({
+                  column_id: columnID,
+                  note: null,
+                  content_id: responseIssue.data.id,
+                  content_type: "Issue",
+                });
+
+              });
+            });
