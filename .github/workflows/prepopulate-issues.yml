@@ -64,7 +64,7 @@ jobs:
 
                 // read file
                 let issueTitle = path.parse(file).name;
-                let issueBody = fs.readFileSync(file, "utf8");
+                let issueBody = fs.readFileSync(path.join(issuesDir, file), "utf8");
 
                 // create issue
                 const responseIssue = await github.issues.create({
