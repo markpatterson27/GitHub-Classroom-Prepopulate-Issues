@@ -1,5 +1,37 @@
 # GitHub Classroom - Prepopulate Issues
 
+## Action Version
+
+I made an action of the workflow in this repo: https://github.com/markpatterson27/create-issues.
+
+You can achieve the same result as the workflow based solution, using the action and a workflow with the following contents:
+
+```yaml
+name: Create Issues
+
+on:
+  create:
+
+jobs:
+  create:
+    name: Create project and issues
+    runs-on: ubuntu-latest
+    if: ${{ github.ref == 'refs/heads/feedback' }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Create issues
+        uses: markpatterson27/create-issues@v1
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          project-name: Assignment Tasks
+          project-description: Complete the tasks outlined in each issue.
+          issues-directory: .github/STARTING_ISSUES
+
+```
+
+## Old Workflow Based Version
+
 Workflow file that prepopulates an assignment repository with issues when a student accepts the assignment.
 
 Requirements:
